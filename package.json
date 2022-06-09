@@ -1,0 +1,31 @@
+{
+  "name": "doichainjs-lib",
+  "version": "2.0.0",
+  "description": "js-doichain",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "npx babel src --watch --out-dir dist",
+    "build": "npx babel src --out-dir dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Doichain",
+    "Blockchain",
+    "Doicoin",
+    "BlockPro"
+  ],
+  "author": "Lena Stallinger",
+  "license": "MIT",
+  "dependencies": {
+    "bip39": "^3.0.4"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2"
+  }
+}
