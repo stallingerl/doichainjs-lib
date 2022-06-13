@@ -10,4 +10,6 @@ export const createHdKeyFromMnemonic = (mnemonicSeedphrase, password) => {
         .toString("hex")
     return HDKey.fromMasterSeed(Buffer.from(masterSeed, "hex"), global.DEFAULT_NETWORK.bip32)
 }
-export default createHdKeyFromMnemonic
+
+
+

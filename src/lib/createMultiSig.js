@@ -8,7 +8,6 @@ import pkg from 'ecpair';
 const { ECPair } = pkg;
 import { s } from "../../p2p/sharedState.js";
 import { getByteCount } from "../lib/getByteCount.js"
-import { keys } from "libp2p-crypto";
 import { getKeyPair } from "../../p2p/publish.js";
 
 export const multiSigAddress =  (network, receivedPubKeys) => {
@@ -44,7 +43,7 @@ export const multiSigTx = async (network, addrType, purpose, coinType, account, 
 
         const op_name = conv(cid, { in: 'binary', out: 'hex' })
         let op_value = conv(hash, { in: 'binary', out: 'hex' })
-        const op_address = base58.decode(destAddress).toString('hex').substr(2, 40);
+        const op_address = conv(destAddress, { in: 'binary', out: 'hex'})
         
         opCodesStackScript = bitcoin.script.fromASM(
             `

@@ -3,6 +3,12 @@ const require = createRequire(import.meta.url);
 var fs = require('fs');
 import path from 'path'
 const __dirname = path.resolve('./');
+var dir = './derivationPaths';
+
+if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+}
+
 
 export async function saveAddress(purpose, derivationPath, address, id) {
 

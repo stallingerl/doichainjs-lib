@@ -2,7 +2,6 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 import { getPathsOfAddresses, getAddr } from "./getAddress.js";
 import { saveAddress} from "./getOrSaveDerivationPath.js"
-import { getBalanceOfAddresses } from "./getBalanceOfAddresses.js";
 
 
 export const getBalanceOfWallet = async (xpub, purpose, coinType, account, o_options, addrType, id) => {

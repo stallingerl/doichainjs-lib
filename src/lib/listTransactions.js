@@ -1,6 +1,7 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const bitcoin = require('bitcoinjs-lib')
+var conv = require('binstring');
 const ElectrumClient = require('@codewarriorr/electrum-client-js')
 import { isOurAddress } from "./isOurAddress.js";
 import { isOurChangeAddress } from "./isOurChangeAddress.js";
@@ -97,7 +98,7 @@ export async function listTransactions(address, o_options, addressList, client) 
 
                 let utxo = false
 
-                if (asmParts[0] !== 'OP_10') {
+                if (asmParts[0] !== 'OP_10' && asmParts[0] !== 'OP_NAME_DOI') {
                     address = out.scriptPubKey.addresses[0]
                     console.log('address', address)
                     for (let i = 0; i < addressList.length; i++) {
@@ -107,15 +108,15 @@ export async function listTransactions(address, o_options, addressList, client) 
                         }
                     }
                 } else {
-                    const chunks = bitcoin.script.decompile(out.script)
-                    nameId = Buffer.from(chunks[1]).toString()
-                    nameValue = Buffer.from(chunks[2]).toString()
-                    address = bitcoin.address.toBase58Check(chunks[7], network.scriptHash)
-                }
-                console.log('name_op nameId', nameId)
-                console.log('name_op nameValue', nameValue)
-                console.log('name_op address', address)
+                    const chunks = out.scriptPubKey.asm.split(" ")
+                    nameId = out.scriptPubKey.nameOp.name
+                    nameValue = out.scriptPubKey.nameOp.value
+                    address = conv(chunks[7], { in: 'hex', out: 'binary' })
 
+                    console.log('name_op nameId', nameId)
+                    console.log('name_op nameValue', nameValue)
+                    console.log('name_op address', address)
+                }
 
 
                 vout = {

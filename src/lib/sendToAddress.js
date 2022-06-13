@@ -3,11 +3,20 @@ const require = createRequire(import.meta.url);
 const bitcoin = require('bitcoinjs-lib')
 var conv = require('binstring');
 import base58 from 'bs58'
-import { VERSION, NETWORK_FEE, VALIDATOR_FEE, EMAIL_VERIFICATION_FEE, TRANSACTION_FEE } from './constants.js'
-import broadcastTransaction from './broadcastTransaction.js'
-import { join } from "path";
+import { getByteCount } from './getByteCount.js'
 
-export const sendToAddress = async (keypair, destAddress, changeAddress, amount, inputsSelected, nameId, nameValue, network) => {
+
+export const sendToAddress = async (keypair, destAddress, changeAddress, amount, inputsSelected, nameId, nameValue, addrType) => {
+
+    let outputCount = 1
+    if (amount > 0) {
+        ++outputCount
+    }
+
+    if (nameId && nameValue) {
+        ++outputCount
+    }
+
 
     let nameFee = 1000000
     let opCodesStackScript = undefined
@@ -17,8 +26,9 @@ export const sendToAddress = async (keypair, destAddress, changeAddress, amount,
 
         const op_name = conv(nameId, { in: 'binary', out: 'hex' })
         let op_value = conv(nameValue, { in: 'binary', out: 'hex' })
+
         if (destAddress !== undefined) {
-            const op_address = base58.decode(destAddress).toString('hex').substr(2, 40);
+            const op_address = conv(destAddress, { in: 'binary', out: 'hex' })
             opCodesStackScript = bitcoin.script.fromASM(
                 `
                                                   OP_10
@@ -33,10 +43,9 @@ export const sendToAddress = async (keypair, destAddress, changeAddress, amount,
                                                   OP_CHECKSIG
                                             `.trim().replace(/\s+/g, ' '),
             )
-        }
-
-        opCodesStackScript = bitcoin.script.fromASM(
-            `
+        } else {
+            opCodesStackScript = bitcoin.script.fromASM(
+                `
                                               OP_10
                                               ${op_name}
                                               ${op_value}
@@ -47,7 +56,8 @@ export const sendToAddress = async (keypair, destAddress, changeAddress, amount,
                                               OP_EQUALVERIFY
                                               OP_CHECKSIG
                                         `.trim().replace(/\s+/g, ' '),
-        )
+            )
+        }
     }
 
     //if no nameId it could be nameId is a network object
@@ -77,7 +87,7 @@ export const sendToAddress = async (keypair, destAddress, changeAddress, amount,
                 let returndTx = await client.blockchain_transaction_get(input[j].tx_hash, 1)
                 let scriptPubKey = returndTx.vout[input[j].tx_pos].scriptPubKey.hex
                 let inputAddr = returndTx.vout[input[j].tx_pos].scriptPubKey.addresses[0]
-                let addrIsSegwit = inputAddr.startsWith("td1") || inputAddr.startsWith("dc")
+                let addrIsSegwit = inputAddr.startsWith("td1") || inputAddr.startsWith("dc") || inputAddr.startsWith("ncrt1")
 
                 // if legacy address
                 if (!addrIsSegwit) {
@@ -117,15 +127,31 @@ export const sendToAddress = async (keypair, destAddress, changeAddress, amount,
             }
         }
     }
-    const fee = 44800 //inputs.length * 180 + 3 * 34 + 500000
+
+    let fee
+    let estimatedVsize
+    addrType = addrType.toUpperCase()
+    let txInputs = { [addrType]: inputs.length }
+    let txOutputs = { [addrType]: outputCount }
+
+    estimatedVsize = getByteCount(txInputs, txOutputs)
+
+
+    fee = (estimatedVsize + 150) * 100
     console.log('fee', fee)
 
     if (amount == undefined)
         amount = 0
 
     // https://bitcoin.stackexchange.com/questions/1195/how-to-calculate-transaction-size-before-sending-legacy-non-segwit-p2pkh-p2sh
-    const changeAmount = Math.round(inputsBalance - amount - fee - (opCodesStackScript ? nameFee : 0))
-    if (destAddress !== undefined) {
+    const changeAmount = inputsBalance - amount - fee - (opCodesStackScript ? nameFee : 0)
+
+    psbt.addOutput({
+        address: changeAddress,
+        value: changeAmount,
+    });
+
+    if (amount > 0) {
         psbt.addOutput({
             address: destAddress,
             value: amount,
@@ -135,17 +161,13 @@ export const sendToAddress = async (keypair, destAddress, changeAddress, amount,
     console.log('added output ' + destAddress, amount)
     console.log('added changeAddress ' + changeAddress, changeAmount)
 
-    psbt.addOutput({
-        address: changeAddress,
-        value: changeAmount,
-    });
-
     if (opCodesStackScript) {
-        psbt.version =  0x7100
-        let script = opCodesStackScript     
+        psbt.version = 0x7100
+        let script = opCodesStackScript
         psbt.addOutput({
             script: script,
-            value: nameFee})
+            value: nameFee
+        })
     }
 
     if (inputs.length == 1) {

@@ -1,6 +1,5 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-import { address } from "bitcoinjs-lib";
 import { getBalanceOfAddresses } from "./getBalanceOfAddresses.js";
 import { saveAddress, getSavedAddresses } from "./getOrSaveDerivationPath.js"
 const bitcoin = require("bitcoinjs-lib")
