@@ -1,7 +1,7 @@
 import { listTransactions } from "./listTransactions.js"
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const ElectrumClient = require('@codewarriorr/electrum-client-js')
+
 
 export const getBalanceOfAddresses = async (addressList, o_options) => {
     let options = {}
@@ -13,17 +13,8 @@ export const getBalanceOfAddresses = async (addressList, o_options) => {
     let addressObjectList = []
     let balance = 0
 
-    global.client = new ElectrumClient("172.22.0.6", 50002, "ssl");
-    try {
-        await global.client.connect(
-            "electrum-client-js", // optional client name
-            "1.4.2" // optional protocol version
-        )
-    } catch (err) {
-        console.error(err);
-    }
     for (const addr of addressList) {
-        const transactions = await listTransactions(addr, options, addressList, global.client)
+        const transactions = await listTransactions(addr, options, addressList)
 
         let addressBalance = 0
         let txs = []

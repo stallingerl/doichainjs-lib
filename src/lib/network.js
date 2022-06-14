@@ -7,7 +7,7 @@ export var DEFAULT_SETTINGS
 global.network = network
 global.DEFAULT_NETWORK = DEFAULT_NETWORK
 global.DEFAULT_SETTINGS = DEFAULT_SETTINGS 
-const ElectrumClient = require("@codewarriorr/electrum-client-js")
+
 
 export const DOICHAIN = {
     name: 'mainnet',
@@ -95,12 +95,3 @@ export const changeNetwork = (newNetwork) => {
 }
 
 
-export const getElectrumClient = (setSettings = []) => {
-    settings.setSettings(setSettings)
-
-    return new ElectrumClient(
-        settings.electrumHost,
-        settings.electrumPort,
-        settings.electrumSSL
-    )
-}

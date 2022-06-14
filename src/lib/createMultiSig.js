@@ -251,7 +251,7 @@ async function getInputData(
     let hash = bitcoin.crypto.sha256(script)
     let reversedHash = Buffer.from(hash.reverse())
 
-    let unspent = await client.blockchain_scripthash_listunspent(
+    let unspent = await global.client.blockchain_scripthash_listunspent(
         reversedHash.toString("hex")
     );
 
@@ -260,7 +260,7 @@ async function getInputData(
         // inputAmount += input.witnessUtxo.value
         let balance = unspent[i].value
         multisigBalance += balance
-        let utx = await client.blockchain_transaction_get(unspent[i].tx_hash, 1)
+        let utx = await global.client.blockchain_transaction_get(unspent[i].tx_hash, 1)
 
         // for non segwit inputs, you must pass the full transaction buffer
         let nonWitnessUtxo = Buffer.from(utx.hex, 'hex');

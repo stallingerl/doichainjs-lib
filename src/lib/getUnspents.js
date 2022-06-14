@@ -16,7 +16,7 @@ export const getUnspents = async (wallet) => {
         let hash = bitcoin.crypto.sha256(script)
         let reversedHash = Buffer.from(hash.reverse())
 
-        let UTXOs = await client.blockchain_scripthash_listunspent(
+        let UTXOs = await global.client.blockchain_scripthash_listunspent(
             reversedHash.toString("hex")
         );
 

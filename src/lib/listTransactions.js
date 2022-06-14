@@ -2,7 +2,6 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const bitcoin = require('bitcoinjs-lib')
 var conv = require('binstring');
-const ElectrumClient = require('@codewarriorr/electrum-client-js')
 import { isOurAddress } from "./isOurAddress.js";
 import { isOurChangeAddress } from "./isOurChangeAddress.js";
 import { getAddressOfInput } from "./getAddressOfInput.js"
@@ -42,7 +41,7 @@ var scriptStrBuf = function (data) {
     return chunk;
 }
 
-export async function listTransactions(address, o_options, addressList, client) {
+export async function listTransactions(address, o_options, addressList) {
     let options = {}
     if (o_options === undefined || o_options.network === undefined)
         options = global.DEFAULT_NETWORK
@@ -57,15 +56,14 @@ export async function listTransactions(address, o_options, addressList, client) 
     let reversedHash = Buffer.from(hash.reverse())
     console.log(address, ' maps to ', reversedHash.toString('hex'))
 
-    //const client = new ElectrumClient("172.22.0.6", 50002, "ssl");
     const result = [];
 
     try {
-        const header = await client.blockchain_headers_subscribe()
-        const history = await client.blockchain_scripthash_getHistory(
+        const header = await global.client.blockchain_headers_subscribe()
+        const history = await global.client.blockchain_scripthash_getHistory(
             reversedHash.toString("hex")
         )
-        const UTXO = await client.blockchain_scripthash_listunspent(
+        const UTXO = await global.client.blockchain_scripthash_listunspent(
             reversedHash.toString("hex")
         )
 
@@ -73,7 +71,7 @@ export async function listTransactions(address, o_options, addressList, client) 
         let i = 0
         for (const tx of UTXO) {
             const transaction = tx
-            const decryptedTx = await client.blockchain_transaction_get(transaction.tx_hash, 1)
+            const decryptedTx = await global.client.blockchain_transaction_get(transaction.tx_hash, 1)
             console.log("decrypted tx with index", i)
 
             //check all inputs and check if the address is ours or not
@@ -139,11 +137,11 @@ export async function listTransactions(address, o_options, addressList, client) 
             i++
         }
         console.info('history length', result.length)
-        const balance = await client.blockchain_scripthash_getBalance(
+        const balance = await global.client.blockchain_scripthash_getBalance(
             reversedHash.toString("hex")
         );
         console.log("Balance: ", balance);
-        const UTXOs = await client.blockchain_scripthash_listunspent(
+        const UTXOs = await global.client.blockchain_scripthash_listunspent(
             reversedHash.toString("hex")
         );
         //console.log("Unspents: ", UTXOs);

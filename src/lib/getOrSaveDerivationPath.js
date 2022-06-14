@@ -11,20 +11,29 @@ if (!fs.existsSync(dir)) {
 
 
 export async function saveAddress(purpose, derivationPath, address, id) {
-
     let filename = `${__dirname}/derivationPaths/${purpose.replace("/", "")}-${id}.txt`
 
-    const saveDerPath = new Promise((res, rej) => {
+    return new Promise((res, rej) => {
         // existiert das File mit derPaths?
         if (fs.existsSync(filename)) {
             console.log("Derivation File exists")
             res()
         } else {
-            throw err
+            console.log("No addresses saved yet. Creating new derivationPath file")
+            // save in local file 
+            if (address !== undefined) {
+                fs.writeFile(filename, "", function (err) {
+                    if (err) {
+                        rej(err);
+                    } else {
+                        console.log('Generated derivationPaths file');
+                        res()
+                    }
+                });
+            }
         }
-    }).then((result) => {
+    }).then(() => {
         // wenn ja, dann ließ das File
-        console.log(result)
         return new Promise((res, rej) => {
             fs.readFile(filename, 'utf8', async function (err, data) {
                 if (err) {
@@ -34,23 +43,6 @@ export async function saveAddress(purpose, derivationPath, address, id) {
                     res(data)
                 }
             });
-        })
-    }, (err) => {
-        // wenn das File noch nicht existiert, dann eins erstellen
-        return new Promise((res, rej) => {
-            console.log("No addresses saved yet. Creating new derivationPath file")
-
-            // save in local file 
-            if (address !== undefined) {
-                fs.writeFile(filename, `;0, ${derivationPath}, ${address} \r\n`, function (err) {
-                    if (err){ 
-                        rej(err);
-                    }else{
-                    console.log('Saved first address and derivationPath');
-                    res()
-                    }
-                });
-            }
         })
     }).then((data) => {
         // wenn das File gelesen ist neuen derPath anfügen
@@ -80,12 +72,8 @@ export async function saveAddress(purpose, derivationPath, address, id) {
             }
         })
     }, (err) => {
-        console.log("Couldn't append new derivation Path to list")
-        rej(err)
+        console.log(err)
     })
-
-    return Promise.all([saveDerPath])
-
 }
 
 export async function getSavedAddresses(purpose, id) {
