@@ -2,25 +2,16 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const bitcoin = require('bitcoinjs-lib')
 var conv = require('binstring')
-import base58 from 'bs58'
-import { returnUnusedAddress } from "./getAddress.js"
+import { returnUnusedAddress } from "../src/lib/getAddress.js"
 import pkg from 'ecpair';
 const { ECPair } = pkg;
 import { s } from "../../p2p/sharedState.js";
-import { getByteCount } from "../lib/getByteCount.js"
-import { getKeyPair } from "../../p2p/publish.js";
+import { getByteCount } from "doichainjs-lib"
+
 
 export const multiSigAddress =  (network, receivedPubKeys) => {
-    // TO DO: Lösung für 1. Runde und nur 1 pubKey. Evtl. normale Tx nicht multi 
-    if (s.nNew == undefined) {
-        s.nNew = receivedPubKeys.length
-        s.mNew = Math.round(s.nNew * (2 / 3))
-    }
-    s.nOld = s.nNew
-    s.mOld = s.mNew
-    s.nNew = receivedPubKeys.length
-    s.mNew = Math.round(s.nNew * (2 / 3))
-    var p2sh = createPayment(`p2sh-p2wsh-p2ms(${s.mNew} of ${s.nNew})`, receivedPubKeys, network);
+
+    var p2sh = createPayment(`p2sh-p2wsh-p2ms(${2} of ${3})`, receivedPubKeys, network);
 
     var multiSigAddress = p2sh.payment.address
 
@@ -32,17 +23,17 @@ export const multiSigAddress =  (network, receivedPubKeys) => {
 
 var multisigBalance = 0
 
-export const multiSigTx = async (network, addrType, purpose, coinType, account, id, p2sh, receivedPubKeys, hdkey, topicReward, cid, hash) => {
+export const multiSigTx = async (network, addrType, purpose, coinType, account, id, p2sh, receivedPubKeys, hdkey, topicReward, nameId, nameValue) => {
 
     let nameFee = 1000000
     let destAddress = p2sh.payment.address
 
     let opCodesStackScript = undefined
     //check if we want a nameId or nameValue transaction (create OpCodeStackScript)
-    if (cid && hash && typeof cid === 'string' && typeof hash === 'string') {
+    if (nameId && nameValue && typeof nameId === 'string' && typeof nameValue === 'string') {
 
-        const op_name = conv(cid, { in: 'binary', out: 'hex' })
-        let op_value = conv(hash, { in: 'binary', out: 'hex' })
+        const op_name = conv(nameId, { in: 'binary', out: 'hex' })
+        let op_value = conv(nameValue, { in: 'binary', out: 'hex' })
         const op_address = conv(destAddress, { in: 'binary', out: 'hex'})
         
         opCodesStackScript = bitcoin.script.fromASM(
@@ -300,4 +291,10 @@ function getWitnessUtxo(out) {
     out.value = value * 100000000
     out.script = script
     return out;
+}
+
+function getKeyPair() {
+    // Get PubKey
+    let keyPair = s.hdkey.derive("m84/0/0/0/1")
+    return keyPair
 }

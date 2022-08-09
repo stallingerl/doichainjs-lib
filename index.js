@@ -2,7 +2,7 @@ import * as constants from "./src/lib/constants.js"
 import { createHdKeyFromMnemonic } from "./src/lib/createHdKeyFromMnemonic.js"
 import { createAndSendTransaction } from "./src/lib/createAndSendTransaction.js"
 import { createNewWallet } from "./src/lib/createNewWallet.js"
-import { generateMnemonic  } from "./src/lib/generateMnemonic.js"
+import { generateMnemonic } from "./src/lib/generateMnemonic.js"
 import { decryptAES } from "./src/lib/decryptAES.js"
 import { encryptAES } from "./src/lib/encryptAES.js"
 import { getPathsOfAddresses, returnUnusedAddress } from './src/lib/getAddress.js'
@@ -15,7 +15,7 @@ import { isOurChangeAddress } from './src/lib/isOurChangeAddress.js'
 import { listTransactions } from "./src/lib/listTransactions.js"
 import * as network from './src/lib/network.js'
 import { sendToAddress } from "./src/lib/sendToAddress.js"
-
+import { getByteCount } from "./src/lib/getByteCount.js"
 
 
 export {
@@ -31,10 +31,11 @@ export {
   listTransactions,
   getBalanceOfAddresses,
   getBalanceOfWallet,
+  getByteCount,
   decryptAES,
   encryptAES,
   isOurAddress,
   isOurChangeAddress,
   sendToAddress,
-  getUnspents,
+  getUnspents
 }

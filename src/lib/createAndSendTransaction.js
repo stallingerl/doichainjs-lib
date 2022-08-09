@@ -38,9 +38,9 @@ export const createAndSendTransaction = async (decryptedSeedPhrase, password, am
         const addr = our_wallet.addresses[i]
         // console.log('checking change addresses with chainId '+(addr.derivationPath.split('/')[2])+'for transactions ',addr)
         //if(addr.derivationPath.split('/')[2] === 1 && addr.transactions.length===0)
-        lastAddressIndex = Number(addr.derivationPath.split('/')[3])
+         lastAddressIndex = Number(addr.derivationPath.split('/')[5])
 
-        if (Number(addr.derivationPath.split('/')[2]) === 1 && addr.transactions.length === 0) {
+        if (Number(addr.derivationPath.split('/')[4]) === 1 && addr.transactions.length === 0) {
             changeAddress = addr.address
             console.log('found change address in wallet without transactions', changeAddress)
             // break;
